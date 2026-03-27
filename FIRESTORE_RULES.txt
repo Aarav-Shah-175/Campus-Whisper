@@ -1,0 +1,74 @@
+IMPORTANT: Update your Firestore Security Rules in Firebase Console
+
+Go to Firebase Console > Your Project > Firestore Database > Rules
+
+Replace the existing rules with:
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && request.auth.uid in [
+        'aSvIoKqdGJfSDPiJ4AhTBEtymkG3'
+      ];
+    }
+
+    function isNotBanned() {
+      return isSignedIn() &&
+        !exists(/databases/$(database)/documents/bannedUsers/$(request.auth.uid));
+    }
+
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if isNotBanned();
+      allow update: if isAdmin() || isNotBanned();
+      allow delete: if isAdmin() || request.auth.uid == resource.data.userId;
+    }
+
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isNotBanned();
+      allow update: if isAdmin() || (isNotBanned() && request.auth.uid == resource.data.userId);
+      allow delete: if isAdmin() || request.auth.uid == resource.data.userId;
+    }
+
+    match /postVotes/{voteId} {
+      allow read: if true;
+      allow create, update, delete: if isNotBanned();
+    }
+
+    match /commentVotes/{voteId} {
+      allow read: if true;
+      allow create, update, delete: if isNotBanned();
+    }
+
+    match /pollVotes/{voteId} {
+      allow read: if true;
+      allow create, update, delete: if isNotBanned();
+    }
+
+    match /reports/{reportId} {
+      allow create: if isNotBanned();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /bannedUsers/{userId} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
+
+These rules now allow:
+- Anyone to read posts and comments
+- Signed-in, non-banned users to create posts, comments, votes, polls, and reports
+- Admins to review reports, delete reported content, and manage bans
+- Banned users to be blocked from participating further in the forum
+
+Important:
+- If you add more admins, add their UIDs inside the `isAdmin()` list above.
+- After publishing these rules, the admin moderation actions in the dashboard will work.
