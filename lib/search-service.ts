@@ -48,13 +48,14 @@ export async function getPostsByCategory(category: string): Promise<Post[]> {
     );
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs
-      .map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
+    const posts = querySnapshot.docs.map((snapshotDoc) => ({
+      id: snapshotDoc.id,
+      ...snapshotDoc.data(),
+    })) as Post[];
+
+    return posts
       .filter((post) => !post.isDeleted)
-      .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()) as Post[];
+      .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
   } catch (error) {
     console.error('Error fetching posts by category:', error);
     throw error;
