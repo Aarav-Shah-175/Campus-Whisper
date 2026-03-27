@@ -98,12 +98,12 @@ export async function getReports(
     }
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs
-      .map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-      .sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()) as Report[];
+    const reports = querySnapshot.docs.map((reportDoc) => ({
+      id: reportDoc.id,
+      ...reportDoc.data(),
+    })) as Report[];
+
+    return reports.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
   } catch (error) {
     console.error('Error fetching reports:', error);
     throw error;
