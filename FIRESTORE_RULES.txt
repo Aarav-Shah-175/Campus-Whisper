@@ -53,7 +53,8 @@ service cloud.firestore {
 
     match /reports/{reportId} {
       allow create: if isNotBanned();
-      allow read, update, delete: if isAdmin();
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.reporterUserId);
+      allow update, delete: if isAdmin();
     }
 
     match /bannedUsers/{userId} {
