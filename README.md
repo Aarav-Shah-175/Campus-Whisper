@@ -130,3 +130,6 @@ The project’s main novelty is not a new ML algorithm, but the **combination of
 ## 6. Conclusion
 
 Campus Whisper is a practical full-stack anonymous discussion system built around real-time community interaction and safety controls. Its strength lies in integrating content creation, engagement, moderation, and analytics into a single Firestore-backed application. If a live dataset snapshot is exported, this report can be extended with exact counts, charts, and time-based performance trends.
+
+## Desployed Site
+https://campwhisper.netlify.app/
